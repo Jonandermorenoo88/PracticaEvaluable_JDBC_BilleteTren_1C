@@ -13,8 +13,8 @@ import lsi.ubu.util.ExecuteScript;
  * AnularBillete: Anula la compra de un billete de Tren controlando si existe el
  * viaje y el ticket segun PDF de la carpeta enunciado
  * 
- * @author <a href="mailto:jmaudes@ubu.es">Jes s Maudes</a>
- * @author <a href="mailto:rmartico@ubu.es">Ra l Marticorena</a>
+ * @author <a href="mailto:jmaudes@ubu.es">Jesus Maudes</a>
+ * @author <a href="mailto:rmartico@ubu.es">Raul Marticorena</a>
  * @author <a href="mailto:srarribas@ubu.es">Sandra Rodríguez</a>
  * @version 1.0
  * @since 1.0
