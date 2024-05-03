@@ -27,10 +27,83 @@ public class ServicioImpl implements Servicio {
 		java.sql.Timestamp horaTimestamp = new java.sql.Timestamp(hora.getTime());
 
 		Connection con = null;
-		PreparedStatement st = null;
+		PreparedStatement SEL_viajes = null;
+		PreparedStatement SEL_ticket = null;
+		PreparedStatement UPD_viajes = null;
+		PreparedStatement DEL_ticket = null;
+
 		ResultSet rs = null;
+		ResultSet rs2 = null;
+
+		int rowCount = -1;
 
 		// A completar por el alumno
+
+		try {
+			con = pool.getConnection();
+
+			// recogida del idViaje y precio con una consulta.
+			SEL_viajes = con.prepareStatement("SELECT idViaje, precio FROM recorridos natural join viajes "
+					+ "WHERE horaSalida-trunc(horaSalida) = ?-trunc(?) AND trunc(fecha) = trunc(?) "
+					+ "AND estacionOrigen = ? AND estacionDestino = ? ");
+
+			SEL_viajes.setTimestamp(1, horaTimestamp);
+			SEL_viajes.setTimestamp(2, horaTimestamp);
+			SEL_viajes.setDate(3, fechaSqlDate);
+			SEL_viajes.setString(4, origen);
+			SEL_viajes.setString(5, destino);
+
+			rs = SEL_viajes.executeQuery();
+
+			if (!rs.next())
+				throw new CompraBilleteTrenException(CompraBilleteTrenException.NO_EXISTE_VIAJE);
+
+			// comprobar si billete existe
+			SEL_ticket = con.prepareStatement("SELECT COUNT(*) FROM tickets WHERE idTicket = ?");
+			SEL_ticket.setInt(1, ticket);
+			rs2 = SEL_ticket.executeQuery();
+
+			if (rs2.next() && rs2.getInt(1) <= 0) {
+				throw new AnularBilleteTrenException(AnularBilleteTrenException.NO_EXISTE);
+			}
+
+			// Insert del ticket con el nuevo viaje
+			DEL_ticket = con.prepareStatement("DELETE FROM tickets WHERE idTicket = ?");
+			DEL_ticket.setInt(1, ticket);
+
+			DEL_ticket.executeUpdate();
+
+			// Update de la tabla viajes
+			UPD_viajes = con.prepareStatement("UPDATE viajes SET nPlazaslibres = nPlazaslibres + ? WHERE idViaje = ?");
+			UPD_viajes.setInt(1, nroPlazas);
+			UPD_viajes.setInt(2, rs.getInt(1));
+			rowCount = UPD_viajes.executeUpdate();
+
+			if (rowCount == 0)
+				throw new SQLException();
+
+			con.commit();
+
+		} catch (SQLException e) {
+			con.rollback();
+			throw e;
+
+		} finally {
+			if (rs != null)
+				rs.close();
+
+			if (DEL_ticket != null)
+				DEL_ticket.close();
+			if (UPD_viajes != null)
+				UPD_viajes.close();
+			if (SEL_viajes != null)
+				SEL_viajes.close();
+			if (SEL_ticket != null)
+				SEL_ticket.close();
+
+			if (con != null)
+				con.close();
+		}
 	}
 
 	@Override
