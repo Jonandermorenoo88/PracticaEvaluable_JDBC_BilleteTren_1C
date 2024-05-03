@@ -26,15 +26,41 @@ public class Tests {
 
 	public void ejecutarTestsAnularBilletes() {
 
-		Servicio servicio = new ServicioImpl();
+	    Servicio servicio = new ServicioImpl();
+	    PoolDeConexiones pool = PoolDeConexiones.getInstance();
+	    Connection con = null;
+	    PreparedStatement st = null;
+	    ResultSet rs = null;
 
-		PoolDeConexiones pool = PoolDeConexiones.getInstance();
+	    // A completar por el alumno
+	    // datos de prueba
+	    java.util.Date fecha = toDate("04/05/2024");
+	    Time hora = Time.valueOf("8:30:00");
+	    int nroPlazas = 1;
+	    int id_billete = 1; // Declaración de id_billete
 
-		Connection con = null;
-		PreparedStatement st = null;
-		ResultSet rs = null;
+	    System.out.println("Inicio de la prueba de anulación de billetes");
+	    // anular billete que existe
+	    try {
+	        System.out.println("Intentando anular un billete...");
+	        con = pool.getConnection();
+	        st = con.prepareStatement("SELECT COUNT(*) FROM tickets WHERE idTicket = ?");
+	        st.setInt(1, id_billete);
 
-		// A completar por el alumno
+	        // Ahora intentamos anular el billete que acabamos de comprar
+	        servicio.anularBillete(hora, fecha, ORIGEN, DESTINO, nroPlazas, id_billete);
+	        rs = st.executeQuery();
+	        if (rs.next() && rs.getInt(1) != 0) {
+	            System.out.println("Anulación de billete MAL");
+	        } else {
+	            System.out.println("Anulación de billete OK");
+	        }
+
+	    } catch (SQLException e) {
+	        System.out.println("Error inesperado al intentar anular el billete: " + e.getMessage());
+	    }
+
+	    System.out.println("Fin de la prueba de anulación de billetes");
 	}
 
 	public void ejecutarTestsCompraBilletes() {
