@@ -36,7 +36,7 @@ public class CompraBilleteTren {
 
 		// Crear las tablas y filas en base de datos para la prueba
 		ExecuteScript.run("sql/CompraBilleteTren.sql");
-		System.out.println("----------------------------------");
+		System.out.println("---------------------------------------");
 		// Ejecutar tests
 		tests.ejecutarTestsAnularBilletes();
 
